@@ -125,5 +125,5 @@ class TwoPaddleState(State):
     def __init__(self, paddle_yl=0.5 - PADDLE_HEIGHT / 2):
         State.__init__(self)
         self.paddle_yl = paddle_yl
-
+ 
     #TODO: Your codes go here!!!
