@@ -6,6 +6,7 @@ import math
 PADDLE_HEIGHT = 0.2
 REWARD = 0
 
+
 class State:
     'Class that contains all attributes of the world state.'
 
@@ -15,13 +16,15 @@ class State:
                  velocity_x=0.03,
                  velocity_y=0.01,
                  paddle_yr=0.5 - PADDLE_HEIGHT / 2,
-                 reward=0):
+                 reward=0,
+                 q_value=0):
         self.ball_x = ball_x
         self.ball_y = ball_y
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
         self.paddle_yr = paddle_yr
         self.reward = reward
+        self.q_value = q_value
 
     def cont_state(self):
         '''
@@ -56,8 +59,10 @@ class State:
             gameover = 1
         else:
             gameover = 0
-        return [curr_ball_x, curr_ball_y, curr_vx, curr_vy, discrete_paddle_yr, gameover]
-
+        return [
+            curr_ball_x, curr_ball_y, curr_vx, curr_vy, discrete_paddle_yr,
+            gameover
+        ]
 
     def reset(self):
         '''
@@ -70,58 +75,61 @@ class State:
         self.paddle_yr = 0.5 - PADDLE_HEIGHT / 2
         self.reward = 0
 
-
     def update_state(self, action):
         '''
         Continuously Update the state.
         :param action: the action of the paddle, can be 0.04 (goes down) or -0.04 (goes up).
+        :return: return the next state
         '''
         self.reward = 0
+        next_state = State()
         old_vx = self.velocity_x
         old_vy = self.velocity_y
-        self.paddle_yr += action
-        if self.paddle_yr < 0:
-            self.paddle_yr = 0
-        elif self.paddle_yr > 1 - PADDLE_HEIGHT:
-            self.paddle_yr = PADDLE_HEIGHT
+        next_state.paddle_yr = self.paddle_yr + action
+        if next_state.paddle_yr < 0:
+            next_state.paddle_yr = 0
+        elif next_state.paddle_yr > 1 - PADDLE_HEIGHT:
+            next_state.paddle_yr = PADDLE_HEIGHT
         # Update ball position
-        self.ball_x += self.velocity_x
-        self.ball_y += self.velocity_y
+        next_state.ball_x = self.ball_x + self.velocity_x
+        next_state.ball_y = self.ball_y + self.velocity_y
         # Check for bouncing
-        if self.ball_y < 0:
-            self.ball_y = -self.ball_y
-            self.velocity_y = -self.velocity_y
-        if self.ball_y > 1:
-            self.ball_y = 2 - self.ball_y
-            self.velocity_y = -self.velocity_y
-        if self.ball_x < 0:
-            self.ball_x = -self.ball_x
-            self.velocity_x = -self.velocity_x
+        if next_state.ball_y < 0:
+            next_state.ball_y = -self.ball_y
+            next_state.velocity_y = -self.velocity_y
+        if next_state.ball_y > 1:
+            next_state.ball_y = 2 - self.ball_y
+            next_state.velocity_y = -self.velocity_y
+        if next_state.ball_x < 0:
+            next_state.ball_x = -self.ball_x
+            next_state.velocity_x = -self.velocity_x
         # Check for paddle bouncing
-        if self.ball_x > 1:
-            if self.ball_y >= self.paddle_yr and self.ball_y <= (
-                    self.paddle_yr + PADDLE_HEIGHT):
-                self.reward = 1
+        if next_state.ball_x > 1:
+            if next_state.ball_y >= next_state.paddle_yr and next_state.ball_y <= (
+                    next_state.paddle_yr + PADDLE_HEIGHT):
+                next_state.reward = 1
                 u = random.uniform(-0.015, 0.015)
                 v = random.uniform(-0.03, 0.03)
                 new_x = -self.velocity_x + u
                 if abs(new_x) > 0.03:
-                    self.velocity_x = new_x
+                    next_state.velocity_x = new_x
                 else:
-                    self.velocity_x = 0.03
-                self.velocity_y += v
+                    next_state.velocity_x = 0.03
+                next_state.velocity_y = self.velocity_y + v
             else:
-                self.reward = -1  # Out of bound
+                next_state.reward = -1  # Out of bound
                 # self.reset()
         # Restrict maximum v_x and v_y
-        while abs(self.velocity_x) > 1:
-            self.velocity_x = old_vx + random.uniform(-0.015, 0.015)
-        while abs(self.velocity_y) > 1:
-            self.velocity_y = old_vy + random.uniform(-0.03, 0.03)
+        while abs(next_state.velocity_x) > 1:
+            next_state.velocity_x = old_vx + random.uniform(-0.015, 0.015)
+        while abs(next_state.velocity_y) > 1:
+            next_state.velocity_y = old_vy + random.uniform(-0.03, 0.03)
+        return next_state
 
 
 class TwoPaddleState(State):
     'Class that contains the world state of 2 paddles game'
+
     def __init__(self, paddle_yl=0.5 - PADDLE_HEIGHT / 2):
         State.__init__(self)
         self.paddle_yl = paddle_yl
