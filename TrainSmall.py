@@ -168,15 +168,46 @@ def agent_move():
     return _hit
 
 
+def get_agent_state(curr_state):
+    '''
+    Agent movement function.
+    Used for drawing on screen.
+    '''
+    curr_state_discrete = curr_state.discrete_state()
+    if curr_state_discrete[5] == 1:
+        return curr_state
+    max_Q = -FLT_MAX
+    action = 0
+    for i in range(3):
+        temp_Q = get_state_Q(curr_state_discrete, i)
+        if temp_Q > max_Q:
+            max_Q = temp_Q
+            action = i
+    next_state = curr_state.update_state(POSSIBLE_MOVE[action])
+    return next_state
+
+
+def reset_to_0(the_array):
+    '''
+    Reset the array values to all zeros
+    '''
+    for i, e in enumerate(the_array):
+        if isinstance(e, list):
+            reset_to_0(e)
+        else:
+            the_array[i] = 0
+
+
 def train(train_num, test_games, gamma, decay_c, num_e):
     '''
     Train a agent with given parameters and training times.
     :return: average number of hits
     '''
     # Initialization, not sure if it's necessary in python
-    total_hit = 0
-    Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
-    N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
+    #Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
+    #N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
+    reset_to_0(Q_VALUE)
+    reset_to_0(N_ACTION)
     print('Start training...', flush=True)
     print('Gamma: %f Decay constant: %d Ne: %d' % (gamma, decay_c, num_e), flush=True)
     for i in range(train_num):
@@ -186,6 +217,14 @@ def train(train_num, test_games, gamma, decay_c, num_e):
                 local_total += agent_move()
             print(local_total / 50, end=' ', flush=True)
         learn(gamma, decay_c, num_e)
+    test_result = test(test_games)
+    return test_result
+
+def test(test_games):
+    '''
+    Use trained model to test.
+    '''
+    total_hit = 0
     print('Start testing...', flush=True)
     for i in range(test_games):
         #print(i, end=' ', flush=True)

@@ -131,7 +131,7 @@ class State:
         if next_state.paddle_yr < 0:
             next_state.paddle_yr = 0
         elif next_state.paddle_yr > 1 - PADDLE_HEIGHT:
-            next_state.paddle_yr = PADDLE_HEIGHT
+            next_state.paddle_yr = 1 - PADDLE_HEIGHT
         # Update ball position
         next_state.ball_x = self.ball_x + self.velocity_x
         next_state.ball_y = self.ball_y + self.velocity_y
