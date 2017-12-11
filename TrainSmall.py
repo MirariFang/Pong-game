@@ -34,6 +34,21 @@ def get_state_Q(_state, action):
     vy = dis_state[3]
     p_yr = dis_state[4]
     gameover = dis_state[5]
+    if bx >= 12:
+        print('bx')
+        _state.print_state()
+    if by >= 12:
+        print('by')
+        _state.print_state()
+    if vx >= 12:
+        print('vx')
+        _state.print_state()
+    if vy >= 12:
+        print('vy')
+        _state.print_state()
+    if p_yr >= 12:
+        print('p_yr')
+        _state.print_state()
     return Q_VALUE[bx][by][vx][vy][p_yr][gameover][action]
 
 
@@ -169,9 +184,13 @@ def train(train_num, test_games, gamma, decay_c, num_e):
     total_hit = 0
     Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
     N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
+    print('Start training...', flush=True)
     for i in range(train_num):
+        #print(i, end=' ', flush=True)
         learn(gamma, decay_c, num_e)
+    print('Start testing...', flush=True)
     for i in range(test_games):
+        #print(i, end=' ', flush=True)
         hit = agent_move()
         total_hit += hit
     return total_hit / test_games

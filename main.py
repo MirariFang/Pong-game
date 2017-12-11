@@ -6,5 +6,5 @@ if __name__ == '__main__':
     #         continue
     #     result = TrainSmall.train(100000, 1000, i / 10.0, 5, 10)
     #     print(result)
-    result = TrainSmall.train(100000, 1000, 0.3, 5, 5)
+    result = TrainSmall.train(10000, 1000, 0.3, 5, 5)
     print(result)

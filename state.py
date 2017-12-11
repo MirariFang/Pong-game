@@ -38,8 +38,8 @@ class State:
         Return the current state (discrete).
         This is used for learning.
         '''
-        curr_ball_x = math.floor(self.ball_x * 12 - 1)
-        curr_ball_y = math.floor(self.ball_y * 12 - 1)
+        curr_ball_x = math.floor(self.ball_x * 12)
+        curr_ball_y = math.floor(self.ball_y * 12)
         curr_vx = 1 if self.velocity_x > 0 else -1
         if self.velocity_y >= 0.015:
             curr_vy = 1
@@ -54,6 +54,7 @@ class State:
                                             (1 - PADDLE_HEIGHT))
         if self.ball_x > 1 and self.reward == -1:
             gameover = 1
+            return [0, 0, 0, 0, 0, 1]
         else:
             gameover = 0
         return [
@@ -66,8 +67,8 @@ class State:
         '''
         A discrete state with a different "resolution".
         '''
-        curr_ball_x = math.floor(self.ball_x * 24 - 1)
-        curr_ball_y = math.floor(self.ball_y * 24 - 1)
+        curr_ball_x = math.floor(self.ball_x * 24)
+        curr_ball_y = math.floor(self.ball_y * 24)
         if self.velocity_x > 0:
             if self.velocity_x > 0.4:
                 curr_vx = 3
@@ -97,6 +98,7 @@ class State:
                                             (1 - PADDLE_HEIGHT))
         if self.ball_x > 1 and self.reward == -1:
             gameover = 1
+            return [0, 0, 0, 0, 0, 1]
         else:
             gameover = 0
         return [
@@ -135,13 +137,13 @@ class State:
         next_state.ball_y = self.ball_y + self.velocity_y
         # Check for bouncing
         if next_state.ball_y < 0:
-            next_state.ball_y = -self.ball_y
+            next_state.ball_y = -next_state.ball_y
             next_state.velocity_y = -self.velocity_y
         if next_state.ball_y > 1:
-            next_state.ball_y = 2 - self.ball_y
+            next_state.ball_y = 2 - next_state.ball_y
             next_state.velocity_y = -self.velocity_y
         if next_state.ball_x < 0:
-            next_state.ball_x = -self.ball_x
+            next_state.ball_x = -next_state.ball_x
             next_state.velocity_x = -self.velocity_x
         # Check for paddle bouncing
         if next_state.ball_x > 1:
