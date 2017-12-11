@@ -26,7 +26,7 @@ def get_state_Q(_state, action):
     '''
     Get the Q-value of the input state.
     '''
-    dis_state = _state.big_discrete_state()
+    dis_state = _state.alter_discrete_state()
     bx = dis_state[0]
     by = dis_state[1]
     vx = dis_state[2]
@@ -40,7 +40,7 @@ def set_state_Q(_state, action, value):
     '''
     Set the Q-value of the input state
     '''
-    dis_state = _state.big_discrete_state()
+    dis_state = _state.alter_discrete_state()
     bx = dis_state[0]
     by = dis_state[1]
     vx = dis_state[2]
@@ -54,7 +54,7 @@ def get_state_N(_state, action):
     '''
     Get the N of the input state.
     '''
-    dis_state = _state.big_discrete_state()
+    dis_state = _state.alter_discrete_state()
     bx = dis_state[0]
     by = dis_state[1]
     vx = dis_state[2]
@@ -69,7 +69,7 @@ def set_state_N(_state, action, value):
     '''
     Set the N of the input state.
     '''
-    dis_state = _state.big_discrete_state()
+    dis_state = _state.alter_discrete_state()
     bx = dis_state[0]
     by = dis_state[1]
     vx = dis_state[2]
@@ -86,7 +86,7 @@ def learn(gamma, decay_constant, num_e):
     curr_state = state.State()
     while 1:
         # From current state s, select an action a.
-        curr_state_discrete = curr_state.big_discrete_state()
+        curr_state_discrete = curr_state.alter_discrete_state()
         max_exp_func = -FLT_MAX
         over = curr_state_discrete[5]
         action = 0
@@ -140,7 +140,7 @@ def agent_move():
     curr_state = state.State()
     while 1:
         #curr_state.print_state()
-        curr_state_discrete = curr_state.big_discrete_state()
+        curr_state_discrete = curr_state.alter_discrete_state()
         if curr_state_discrete[5] == 1:
             break
         max_Q = -FLT_MAX
