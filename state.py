@@ -37,7 +37,6 @@ class State:
         '''
         Return the current state (discrete).
         This is used for learning.
-        Always call this function after the state is updated.
         '''
         curr_ball_x = math.floor(self.ball_x * 12 - 1)
         curr_ball_y = math.floor(self.ball_y * 12 - 1)
@@ -52,6 +51,33 @@ class State:
             discrete_paddle_yr = 11
         else:
             discrete_paddle_yr = math.floor(12 * self.paddle_yr /
+                                            (1 - PADDLE_HEIGHT))
+        if self.ball_x > 1 and self.reward == -1:
+            gameover = 1
+        else:
+            gameover = 0
+        return [
+            curr_ball_x, curr_ball_y, curr_vx, curr_vy, discrete_paddle_yr,
+            gameover
+        ]
+
+    def big_discrete_state(self):
+        '''
+        A discrete state with higher "resolution".
+        '''
+        curr_ball_x = math.floor(self.ball_x * 24 - 1)
+        curr_ball_y = math.floor(self.ball_y * 24 - 1)
+        curr_vx = 1 if self.velocity_x > 0 else -1
+        if self.velocity_y >= 0.015:
+            curr_vy = 1
+        elif self.velocity_y <= -0.015:
+            curr_vy = -1
+        else:
+            curr_vy = 0
+        if self.paddle_yr == 1 - PADDLE_HEIGHT:
+            discrete_paddle_yr = 23
+        else:
+            discrete_paddle_yr = math.floor(24 * self.paddle_yr /
                                             (1 - PADDLE_HEIGHT))
         if self.ball_x > 1 and self.reward == -1:
             gameover = 1

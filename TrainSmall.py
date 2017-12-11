@@ -7,7 +7,6 @@ import numpy as np
 import sys
 
 
-
 FLT_MAX = sys.float_info.max
 # Possible actions
 MOVE_UP = -0.04 # index 0
