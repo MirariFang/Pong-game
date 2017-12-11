@@ -57,27 +57,43 @@ class State:
         else:
             gameover = 0
         return [
-            curr_ball_x, curr_ball_y, curr_vx, curr_vy, discrete_paddle_yr,
-            gameover
+            curr_ball_x, curr_ball_y,
+            int((curr_vx + 1) / 2),
+            int((curr_vy + 1) / 2), discrete_paddle_yr, gameover
         ]
 
     def alter_discrete_state(self):
         '''
         A discrete state with a different "resolution".
         '''
-        curr_ball_x = math.floor(self.ball_x * 6 - 1)
-        curr_ball_y = math.floor(self.ball_y * 6 - 1)
-        curr_vx = 1 if self.velocity_x > 0 else -1
+        curr_ball_x = math.floor(self.ball_x * 24 - 1)
+        curr_ball_y = math.floor(self.ball_y * 24 - 1)
+        if self.velocity_x > 0:
+            if self.velocity_x > 0.4:
+                curr_vx = 3
+            else:
+                curr_vx = 2
+        else:
+            if self.velocity_x < 0.4:
+                curr_vx = 0
+            else:
+                curr_vx = 1
         if self.velocity_y >= 0.015:
-            curr_vy = 1
+            if self.velocity_y > 0.1:
+                curr_vy = 4
+            else:
+                curr_vy = 3
         elif self.velocity_y <= -0.015:
-            curr_vy = -1
+            if self.velocity_y < -0.1:
+                curr_vy = 0
+            else:
+                curr_vy = 1
         else:
-            curr_vy = 0
+            curr_vy = 2
         if self.paddle_yr == 1 - PADDLE_HEIGHT:
-            discrete_paddle_yr = 5
+            discrete_paddle_yr = 23
         else:
-            discrete_paddle_yr = math.floor(6 * self.paddle_yr /
+            discrete_paddle_yr = math.floor(24 * self.paddle_yr /
                                             (1 - PADDLE_HEIGHT))
         if self.ball_x > 1 and self.reward == -1:
             gameover = 1

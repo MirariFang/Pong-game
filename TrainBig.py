@@ -17,9 +17,9 @@ POSSIBLE_MOVE = [MOVE_UP, MOVE_DOWN]
 
 # State-action array, where value is the Q.
 # Q(s, a) -- ball_x, ball_y, vx, vy, paddle_y, gameover, action
-Q_VALUE = np.zeros((24, 24, 2, 3, 24, 2, 2))
+Q_VALUE = np.zeros((24, 24, 4, 5, 24, 2, 2))
 # N(s, a)
-N_ACTION = np.zeros((24, 24, 2, 3, 24, 2, 2))
+N_ACTION = np.zeros((24, 24, 4, 5, 24, 2, 2))
 
 
 def get_state_Q(_state, action):
@@ -161,7 +161,7 @@ def agent_move():
 if __name__ == '__main__':
     total_hit = 0
     test_games = 1000
-    for i in range(100000):
+    for i in range(150000):
         learn(0.3, 5.0, 10)
     for i in range(test_games):
         hit = agent_move()

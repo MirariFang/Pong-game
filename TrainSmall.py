@@ -6,11 +6,10 @@ import state
 import numpy as np
 import sys
 
-
 FLT_MAX = sys.float_info.max
 # Possible actions
-MOVE_UP = -0.04 # index 0
-MOVE_DOWN = 0.04 # index 1
+MOVE_UP = -0.04  # index 0
+MOVE_DOWN = 0.04  # index 1
 POSSIBLE_MOVE = [MOVE_UP, MOVE_DOWN]
 #gamma = 0.9
 #decay_constant = 60.0
@@ -21,6 +20,7 @@ POSSIBLE_MOVE = [MOVE_UP, MOVE_DOWN]
 Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 2))
 # N(s, a)
 N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 2))
+
 
 def get_state_Q(_state, action):
     '''
@@ -78,10 +78,13 @@ def set_state_N(_state, action, value):
     gameover = dis_state[5]
     N_ACTION[bx][by][vx][vy][p_yr][gameover][action] = value
 
+
 def learn(gamma, decay_constant, num_e):
     '''
     A single learning trail.
     '''
+    #Q_VALUE[0][0][0][0][0][1][0] = -1
+    #Q_VALUE[0][0][0][0][0][1][1] = -1
     curr_state = state.State()
     while 1:
         # From current state s, select an action a.
@@ -156,14 +159,23 @@ def agent_move():
             _hit += 1
     return _hit
 
-if __name__ == '__main__':
+
+def train(train_num, test_games, gamma, decay_c, num_e):
+    '''
+    Train a agent with given parameters and training times.
+    :return: average number of hits
+    '''
+    # Initialization, not sure if it's necessary in python
     total_hit = 0
-    test_games = 1000
-    for i in range(100000):
-        learn(0.3, 5.0, 10)
+    Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 2))
+    N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 2))
+    for i in range(train_num):
+        learn(gamma, decay_c, num_e)
     for i in range(test_games):
         hit = agent_move()
         total_hit += hit
-        #print(hit)
-    print("Paddle bouncing: ", end='')
-    print(total_hit / test_games)
+    return total_hit / test_games
+
+if __name__ == '__main__':
+    retval = train(100000, 1000, 0.3, 5, 10)
+    print(retval)
