@@ -6,20 +6,21 @@ import state
 import numpy as np
 import sys
 
-FLT_MAX = sys.float_info.max
+FLT_MAX = 10000000
 # Possible actions
 MOVE_UP = -0.04  # index 0
 MOVE_DOWN = 0.04  # index 1
-POSSIBLE_MOVE = [MOVE_UP, MOVE_DOWN]
+NOTHING = 0
+POSSIBLE_MOVE = [MOVE_UP, MOVE_DOWN, NOTHING]
 #gamma = 0.9
 #decay_constant = 60.0
 #num_e = 5
 
 # State-action array, where value is the Q.
 # Q(s, a) -- ball_x, ball_y, vx, vy, paddle_y, gameover, action
-Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 2))
+Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
 # N(s, a)
-N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 2))
+N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
 
 
 def get_state_Q(_state, action):
@@ -93,7 +94,7 @@ def learn(gamma, decay_constant, num_e):
         over = curr_state_discrete[5]
         action = 0
         new_num_act = 0
-        for i in range(2):
+        for i in range(3):
             num_action = get_state_N(curr_state, i)
             if num_action < num_e:
                 exp_func = FLT_MAX
@@ -112,7 +113,7 @@ def learn(gamma, decay_constant, num_e):
         if over == 1:
             over_Q = get_state_Q(curr_state, action)
             max_next_Q = -FLT_MAX
-            for i in range(2):
+            for i in range(3):
                 temp_Q = get_state_Q(curr_state, i)
                 if temp_Q > max_next_Q:
                     max_next_Q = temp_Q
@@ -123,7 +124,7 @@ def learn(gamma, decay_constant, num_e):
         next_state = curr_state.update_state(move)
         # Perform the TD updates
         max_next_Q = -FLT_MAX
-        for i in range(2):
+        for i in range(3):
             temp_Q = get_state_Q(next_state, i)
             if temp_Q > max_next_Q:
                 max_next_Q = temp_Q
@@ -140,20 +141,19 @@ def agent_move():
     '''
     _hit = 0
     curr_state = state.State()
+    #count = 0
     while 1:
-        #curr_state.print_state()
+        #count += 1
         curr_state_discrete = curr_state.discrete_state()
         if curr_state_discrete[5] == 1:
             break
         max_Q = -FLT_MAX
         action = 0
-        for i in range(2):
+        for i in range(3):
             temp_Q = get_state_Q(curr_state, i)
             if temp_Q > max_Q:
                 max_Q = temp_Q
                 action = i
-        #print(max_Q)
-        #print(action)
         curr_state = curr_state.update_state(POSSIBLE_MOVE[action])
         if curr_state.reward == 1:
             _hit += 1
@@ -167,8 +167,8 @@ def train(train_num, test_games, gamma, decay_c, num_e):
     '''
     # Initialization, not sure if it's necessary in python
     total_hit = 0
-    Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 2))
-    N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 2))
+    Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
+    N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
     for i in range(train_num):
         learn(gamma, decay_c, num_e)
     for i in range(test_games):

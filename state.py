@@ -123,8 +123,8 @@ class State:
         '''
         self.reward = 0
         next_state = State()
-        old_vx = self.velocity_x
-        old_vy = self.velocity_y
+        next_state.velocity_x = self.velocity_x
+        next_state.velocity_y = self.velocity_y
         next_state.paddle_yr = self.paddle_yr + action
         if next_state.paddle_yr < 0:
             next_state.paddle_yr = 0
@@ -151,6 +151,7 @@ class State:
                 u = random.uniform(-0.015, 0.015)
                 v = random.uniform(-0.03, 0.03)
                 new_vx = -abs(self.velocity_x + u)
+                next_state.ball_x = 2 - next_state.ball_x
                 if abs(new_vx) > 0.03:
                     next_state.velocity_x = new_vx
                 else:
