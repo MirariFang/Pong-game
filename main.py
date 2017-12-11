@@ -83,15 +83,12 @@ def learn(gamma, decay_constant, num_e):
     '''
     A single learning trail.
     '''
-    init_state = state.State()
-    curr_state = init_state
+    curr_state = state.State()
     while 1:
         # From current state s, select an action a.
         curr_state_discrete = curr_state.discrete_state()
-        max_exp_func = -1
+        max_exp_func = -FLT_MAX
         over = curr_state_discrete[5]
-        if over == 1:
-            break
         action = 0
         new_num_act = 0
         for i in range(2):
@@ -109,10 +106,21 @@ def learn(gamma, decay_constant, num_e):
         # Acquire the alpha first, then update the N
         alpha = decay_constant / (decay_constant + new_num_act - 1)
         set_state_N(curr_state, action, new_num_act)
+        # Handle the gameover state, just a special case of TD update
+        if over == 1:
+            over_Q = get_state_Q(curr_state, action)
+            max_next_Q = -FLT_MAX
+            for i in range(2):
+                temp_Q = get_state_Q(curr_state, i)
+                if temp_Q > max_next_Q:
+                    max_next_Q = temp_Q
+            new_over_Q = over_Q + alpha * (-1 + gamma * max_next_Q - over_Q)
+            set_state_Q(curr_state, action, new_over_Q)
+            break
         # Get the successor state s'
         next_state = curr_state.update_state(move)
         # Perform the TD updates
-        max_next_Q = -1
+        max_next_Q = -FLT_MAX
         for i in range(2):
             temp_Q = get_state_Q(next_state, i)
             if temp_Q > max_next_Q:
@@ -123,10 +131,40 @@ def learn(gamma, decay_constant, num_e):
         set_state_Q(curr_state, action, new_Q)
         curr_state = next_state
 
+
 def agent_move():
     '''
     Agent moves based on training model.
     '''
+    _hit = 0
+    curr_state = state.State()
+    while 1:
+        #curr_state.print_state()
+        curr_state_discrete = curr_state.discrete_state()
+        if curr_state_discrete[5] == 1:
+            break
+        max_Q = -FLT_MAX
+        action = 0
+        for i in range(2):
+            temp_Q = get_state_Q(curr_state, i)
+            if temp_Q > max_Q:
+                max_Q = temp_Q
+                action = i
+        #print(max_Q)
+        #print(action)
+        curr_state = curr_state.update_state(POSSIBLE_MOVE[action])
+        if curr_state.reward == 1:
+            _hit += 1
+    return _hit
 
 if __name__ == '__main__':
-    learn(0.9, 60.0, 5)
+    total_hit = 0
+    test_games = 1000
+    for i in range(100000):
+        learn(0.3, 5.0, 10)
+    for i in range(test_games):
+        hit = agent_move()
+        total_hit += hit
+        #print(hit)
+    print("Paddle bouncing: ", end='')
+    print(total_hit / test_games)

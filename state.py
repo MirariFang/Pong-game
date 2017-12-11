@@ -16,15 +16,13 @@ class State:
                  velocity_x=0.03,
                  velocity_y=0.01,
                  paddle_yr=0.5 - PADDLE_HEIGHT / 2,
-                 reward=0,
-                 q_value=0):
+                 reward=0):
         self.ball_x = ball_x
         self.ball_y = ball_y
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
         self.paddle_yr = paddle_yr
         self.reward = reward
-        self.q_value = q_value
 
     def cont_state(self):
         '''
@@ -55,7 +53,7 @@ class State:
         else:
             discrete_paddle_yr = math.floor(12 * self.paddle_yr /
                                             (1 - PADDLE_HEIGHT))
-        if self.ball_x > 1:
+        if self.ball_x > 1 and self.reward == -1:
             gameover = 1
         else:
             gameover = 0
@@ -110,21 +108,41 @@ class State:
                 next_state.reward = 1
                 u = random.uniform(-0.015, 0.015)
                 v = random.uniform(-0.03, 0.03)
-                new_x = -self.velocity_x + u
-                if abs(new_x) > 0.03:
-                    next_state.velocity_x = new_x
+                new_vx = -abs(self.velocity_x + u)
+                if abs(new_vx) > 0.03:
+                    next_state.velocity_x = new_vx
                 else:
-                    next_state.velocity_x = 0.03
+                    next_state.velocity_x = -0.03
                 next_state.velocity_y = self.velocity_y + v
             else:
                 next_state.reward = -1  # Out of bound
                 # self.reset()
         # Restrict maximum v_x and v_y
-        while abs(next_state.velocity_x) > 1:
-            next_state.velocity_x = old_vx + random.uniform(-0.015, 0.015)
-        while abs(next_state.velocity_y) > 1:
-            next_state.velocity_y = old_vy + random.uniform(-0.03, 0.03)
+        # Hardcode them to 0.3 or -0.3
+        if abs(next_state.velocity_x) > 1:
+            if next_state.velocity_x > 0:
+                next_state.velocity_x = 0.3
+            else:
+                next_state.velocity_x = -0.3
+            #next_state.velocity_x = old_vx + random.uniform(-0.015, 0.015)
+        if abs(next_state.velocity_y) > 1:
+            if next_state.velocity_y > 0:
+                next_state.velocity_y = 0.3
+            else:
+                next_state.velocity_y = -0.3
+            #next_state.velocity_y = old_vy + random.uniform(-0.03, 0.03)
         return next_state
+
+    def print_state(self):
+        '''
+        Print current state. For debugging purpose.
+        '''
+        print(self.ball_x, end=' ')
+        print(self.ball_y, end=' ')
+        print(self.velocity_x, end=' ')
+        print(self.velocity_y, end=' ')
+        print(self.paddle_yr, end=' ')
+        print(self.reward)
 
 
 class TwoPaddleState(State):
