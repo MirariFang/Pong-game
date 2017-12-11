@@ -86,16 +86,21 @@ def learn(gamma, decay_constant, num_e):
     while 1:
         # From current state s, select an action a.
         curr_state_discrete = curr_state.discrete_state()
-        max_exp_func = -FLT_MAX
+        bx = curr_state_discrete[0]
+        by = curr_state_discrete[1]
+        vx = curr_state_discrete[2]
+        vy = curr_state_discrete[3]
+        p_yr = curr_state_discrete[4]
         over = curr_state_discrete[5]
+        max_exp_func = -FLT_MAX
         action = 0
         new_num_act = 0
         for i in range(3):
-            num_action = get_state_N(curr_state_discrete, i)
+            num_action = N_ACTION[bx][by][vx][vy][p_yr][over][i]
             if num_action < num_e:
                 exp_func = FLT_MAX
             else:
-                exp_func = get_state_Q(curr_state_discrete, i)
+                exp_func = Q_VALUE[bx][by][vx][vy][p_yr][over][i]
             if exp_func > max_exp_func:
                 max_exp_func = exp_func
                 new_num_act = num_action + 1
@@ -104,31 +109,37 @@ def learn(gamma, decay_constant, num_e):
         # Update the number of times we've taken action a' from state s
         # Acquire the alpha first, then update the N
         alpha = decay_constant / (decay_constant + new_num_act - 1)
-        set_state_N(curr_state_discrete, action, new_num_act)
+        N_ACTION[bx][by][vx][vy][p_yr][over][action] = new_num_act
         # Handle the gameover state, just a special case of TD update
         if over == 1:
-            over_Q = get_state_Q(curr_state_discrete, action)
+            over_Q = Q_VALUE[bx][by][vx][vy][p_yr][over][action]
             max_next_Q = -FLT_MAX
             for i in range(3):
-                temp_Q = get_state_Q(curr_state_discrete, i)
+                temp_Q = Q_VALUE[bx][by][vx][vy][p_yr][over][i]
                 if temp_Q > max_next_Q:
                     max_next_Q = temp_Q
             new_over_Q = over_Q + alpha * (-1 + gamma * max_next_Q - over_Q)
-            set_state_Q(curr_state_discrete, action, new_over_Q)
+            Q_VALUE[bx][by][vx][vy][p_yr][over][action] = new_over_Q
             break
         # Get the successor state s'
         next_state = curr_state.update_state(move)
         next_state_discrete = next_state.discrete_state()
+        nbx = next_state_discrete[0]
+        nby = next_state_discrete[1]
+        nvx = next_state_discrete[2]
+        nvy = next_state_discrete[3]
+        np_yr = next_state_discrete[4]
+        nover = next_state_discrete[5]
         # Perform the TD updates
         max_next_Q = -FLT_MAX
         for i in range(3):
-            temp_Q = get_state_Q(next_state_discrete, i)
+            temp_Q = Q_VALUE[nbx][nby][nvx][nvy][np_yr][nover][i]
             if temp_Q > max_next_Q:
                 max_next_Q = temp_Q
         reward = curr_state.reward
-        curr_Q = get_state_Q(curr_state_discrete, action)
+        curr_Q = Q_VALUE[bx][by][vx][vy][p_yr][over][action]
         new_Q = curr_Q + alpha * (reward + gamma * max_next_Q - curr_Q)
-        set_state_Q(curr_state_discrete, action, new_Q)
+        Q_VALUE[bx][by][vx][vy][p_yr][over][action] = new_Q
         curr_state = next_state
 
 
@@ -169,7 +180,11 @@ def train(train_num, test_games, gamma, decay_c, num_e):
     print('Start training...', flush=True)
     print('Gamma: %f Decay constant: %d Ne: %d' % (gamma, decay_c, num_e), flush=True)
     for i in range(train_num):
-        #print(i, end=' ', flush=True)
+        if (i + 1) % 1000 == 0:
+            local_total = 0
+            for j in range(50):
+                local_total += agent_move()
+            print(local_total / 50, end=' ', flush=True)
         learn(gamma, decay_c, num_e)
     print('Start testing...', flush=True)
     for i in range(test_games):
@@ -177,6 +192,7 @@ def train(train_num, test_games, gamma, decay_c, num_e):
         hit = agent_move()
         total_hit += hit
     return total_hit / test_games
+
 
 if __name__ == '__main__':
     retval = train(100000, 1000, 0.3, 5, 10)
