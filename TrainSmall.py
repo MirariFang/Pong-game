@@ -23,75 +23,56 @@ Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
 N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
 
 
-def get_state_Q(_state, action):
+def get_state_Q(discrete_state, action):
     '''
     Get the Q-value of the input state.
     '''
-    dis_state = _state.discrete_state()
-    bx = dis_state[0]
-    by = dis_state[1]
-    vx = dis_state[2]
-    vy = dis_state[3]
-    p_yr = dis_state[4]
-    gameover = dis_state[5]
-    if bx >= 12:
-        print('bx')
-        _state.print_state()
-    if by >= 12:
-        print('by')
-        _state.print_state()
-    if vx >= 12:
-        print('vx')
-        _state.print_state()
-    if vy >= 12:
-        print('vy')
-        _state.print_state()
-    if p_yr >= 12:
-        print('p_yr')
-        _state.print_state()
+    bx = discrete_state[0]
+    by = discrete_state[1]
+    vx = discrete_state[2]
+    vy = discrete_state[3]
+    p_yr = discrete_state[4]
+    gameover = discrete_state[5]
     return Q_VALUE[bx][by][vx][vy][p_yr][gameover][action]
 
 
-def set_state_Q(_state, action, value):
+def set_state_Q(discrete_state, action, value):
     '''
     Set the Q-value of the input state
     '''
-    dis_state = _state.discrete_state()
-    bx = dis_state[0]
-    by = dis_state[1]
-    vx = dis_state[2]
-    vy = dis_state[3]
-    p_yr = dis_state[4]
-    gameover = dis_state[5]
+    bx = discrete_state[0]
+    by = discrete_state[1]
+    vx = discrete_state[2]
+    vy = discrete_state[3]
+    p_yr = discrete_state[4]
+    gameover = discrete_state[5]
     Q_VALUE[bx][by][vx][vy][p_yr][gameover][action] = value
 
 
-def get_state_N(_state, action):
+def get_state_N(discrete_state, action):
     '''
     Get the N of the input state.
     '''
-    dis_state = _state.discrete_state()
-    bx = dis_state[0]
-    by = dis_state[1]
-    vx = dis_state[2]
-    vy = dis_state[3]
-    p_yr = dis_state[4]
-    gameover = dis_state[5]
+    bx = discrete_state[0]
+    by = discrete_state[1]
+    vx = discrete_state[2]
+    vy = discrete_state[3]
+    p_yr = discrete_state[4]
+    gameover = discrete_state[5]
     #print(str(bx) + ' ' + str(by) + ' ' + str(vx) + ' ' + str(vy) + ' ' + str(p_yr) + ' ' + str(gameover))
     return N_ACTION[bx][by][vx][vy][p_yr][gameover][action]
 
 
-def set_state_N(_state, action, value):
+def set_state_N(discrete_state, action, value):
     '''
     Set the N of the input state.
     '''
-    dis_state = _state.discrete_state()
-    bx = dis_state[0]
-    by = dis_state[1]
-    vx = dis_state[2]
-    vy = dis_state[3]
-    p_yr = dis_state[4]
-    gameover = dis_state[5]
+    bx = discrete_state[0]
+    by = discrete_state[1]
+    vx = discrete_state[2]
+    vy = discrete_state[3]
+    p_yr = discrete_state[4]
+    gameover = discrete_state[5]
     N_ACTION[bx][by][vx][vy][p_yr][gameover][action] = value
 
 
@@ -110,11 +91,11 @@ def learn(gamma, decay_constant, num_e):
         action = 0
         new_num_act = 0
         for i in range(3):
-            num_action = get_state_N(curr_state, i)
+            num_action = get_state_N(curr_state_discrete, i)
             if num_action < num_e:
                 exp_func = FLT_MAX
             else:
-                exp_func = get_state_Q(curr_state, i)
+                exp_func = get_state_Q(curr_state_discrete, i)
             if exp_func > max_exp_func:
                 max_exp_func = exp_func
                 new_num_act = num_action + 1
@@ -123,30 +104,31 @@ def learn(gamma, decay_constant, num_e):
         # Update the number of times we've taken action a' from state s
         # Acquire the alpha first, then update the N
         alpha = decay_constant / (decay_constant + new_num_act - 1)
-        set_state_N(curr_state, action, new_num_act)
+        set_state_N(curr_state_discrete, action, new_num_act)
         # Handle the gameover state, just a special case of TD update
         if over == 1:
-            over_Q = get_state_Q(curr_state, action)
+            over_Q = get_state_Q(curr_state_discrete, action)
             max_next_Q = -FLT_MAX
             for i in range(3):
-                temp_Q = get_state_Q(curr_state, i)
+                temp_Q = get_state_Q(curr_state_discrete, i)
                 if temp_Q > max_next_Q:
                     max_next_Q = temp_Q
             new_over_Q = over_Q + alpha * (-1 + gamma * max_next_Q - over_Q)
-            set_state_Q(curr_state, action, new_over_Q)
+            set_state_Q(curr_state_discrete, action, new_over_Q)
             break
         # Get the successor state s'
         next_state = curr_state.update_state(move)
+        next_state_discrete = next_state.discrete_state()
         # Perform the TD updates
         max_next_Q = -FLT_MAX
         for i in range(3):
-            temp_Q = get_state_Q(next_state, i)
+            temp_Q = get_state_Q(next_state_discrete, i)
             if temp_Q > max_next_Q:
                 max_next_Q = temp_Q
         reward = curr_state.reward
-        curr_Q = get_state_Q(curr_state, action)
+        curr_Q = get_state_Q(curr_state_discrete, action)
         new_Q = curr_Q + alpha * (reward + gamma * max_next_Q - curr_Q)
-        set_state_Q(curr_state, action, new_Q)
+        set_state_Q(curr_state_discrete, action, new_Q)
         curr_state = next_state
 
 
@@ -165,7 +147,7 @@ def agent_move():
         max_Q = -FLT_MAX
         action = 0
         for i in range(3):
-            temp_Q = get_state_Q(curr_state, i)
+            temp_Q = get_state_Q(curr_state_discrete, i)
             if temp_Q > max_Q:
                 max_Q = temp_Q
                 action = i
@@ -185,6 +167,7 @@ def train(train_num, test_games, gamma, decay_c, num_e):
     Q_VALUE = np.zeros((12, 12, 2, 3, 12, 2, 3))
     N_ACTION = np.zeros((12, 12, 2, 3, 12, 2, 3))
     print('Start training...', flush=True)
+    print('Gamma: %f Decay constant: %d Ne: %d' % (gamma, decay_c, num_e), flush=True)
     for i in range(train_num):
         #print(i, end=' ', flush=True)
         learn(gamma, decay_c, num_e)
