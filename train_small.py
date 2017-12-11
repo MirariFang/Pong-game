@@ -1,5 +1,5 @@
 '''
-Main function of 2.1.
+Main function of 2.1. (Small grid)
 '''
 #TODO: Add statistics of data
 import state
