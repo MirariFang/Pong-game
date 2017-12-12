@@ -7,7 +7,7 @@ WINDOWS_WIDTH = 400
 WINDOWS_HEIGHT = 400
 window = pygame.display.set_mode((WINDOWS_WIDTH, WINDOWS_HEIGHT))
 pygame.display.set_caption("Pong game")
-FPS = 60
+FPS = 25
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)

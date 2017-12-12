@@ -211,11 +211,11 @@ def train(train_num, test_games, gamma, decay_c, num_e):
     print('Start training...', flush=True)
     print('Gamma: %f Decay constant: %d Ne: %d' % (gamma, decay_c, num_e), flush=True)
     for i in range(train_num):
-        if (i + 1) % 1000 == 0:
-            local_total = 0
-            for j in range(50):
-                local_total += agent_move()
-            print(local_total / 50, end=' ', flush=True)
+        # if (i + 1) % 1000 == 0:
+        #     local_total = 0
+        #     for j in range(50):
+        #         local_total += agent_move()
+        #     print(local_total / 50, end=' ', flush=True)
         learn(gamma, decay_c, num_e)
     test_result = test(test_games)
     return test_result
